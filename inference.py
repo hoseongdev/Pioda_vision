@@ -28,8 +28,8 @@ class VisionAnomalyDetector:
         model_path="vision_autoencoder.pt",
         norm_path="norm_stats.pt",
         threshold_path="threshold.pt",
-        seq_length=15,
-        stride=5,
+        seq_length=30,
+        stride=15,
     ):
         norm = torch.load(norm_path, weights_only=True)
         self.mean = norm["mean"]
@@ -54,7 +54,7 @@ class VisionAnomalyDetector:
 
     def score_video(self, video_path: str) -> dict:
         """영상 1개 → 종합 이상 점수 + 판정"""
-        series = extract_au_series(video_path, skip_frames=10)
+        series = extract_au_series(video_path, skip_frames=5)
         windows = build_sequences(series, seq_length=self.seq_length, stride=self.stride)
         if windows is None:
             return {"video_score": None, "is_anomaly": None, "n_windows": 0}

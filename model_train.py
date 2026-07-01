@@ -54,23 +54,24 @@ class VisionLSTMAutoencoder(nn.Module):
 
 
 if __name__ == "__main__":
-    SEQ_LENGTH = 15
-    STRIDE     = 5
+    # 10fps 기준 30프레임=3초 윈도우. (테스트 영상 1개 검증 시엔 15/5로 줄여 사용)
+    SEQ_LENGTH = 30
+    STRIDE     = 15
 
     # ── 데이터 로드 ────────────────────────────────────────
-    data = build_dataset_from_dir("data", seq_length=SEQ_LENGTH, stride=STRIDE)
+    data = build_dataset_from_dir("data", seq_length=SEQ_LENGTH, stride=STRIDE, skip_frames=5)
     if data is None:
         raise RuntimeError("학습 데이터 없음. data/ 폴더에 영상을 넣으세요.")
 
     # Py-Feat detect()가 전역 gradient를 꺼둔 채로 반환하므로 학습 전 복구
     torch.set_grad_enabled(True)
 
-    voice_data = torch.tensor(data, dtype=torch.float32)
+    vision_data = torch.tensor(data, dtype=torch.float32)
 
     # ── 정규화 (Z-score) ───────────────────────────────────
-    mean = voice_data.mean(dim=(0, 1), keepdim=True)
-    std  = voice_data.std(dim=(0, 1), keepdim=True)
-    data_norm = (voice_data - mean) / (std + 1e-7)
+    mean = vision_data.mean(dim=(0, 1), keepdim=True)
+    std  = vision_data.std(dim=(0, 1), keepdim=True)
+    data_norm = (vision_data - mean) / (std + 1e-7)
     torch.save({"mean": mean, "std": std}, "norm_stats.pt")
     print("[train] 정규화 통계 저장 완료")
 
