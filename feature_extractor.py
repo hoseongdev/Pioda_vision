@@ -13,6 +13,7 @@ feature_extractor.py — 영상 → Py-Feat → 프레임별 표정 지표(Actio
 [참고]  온디바이스 제약을 두지 않기로 함(멘토링 반영) → 무겁지만 정확한 Py-Feat 사용.
 """
 
+import glob
 import numpy as np
 
 # Py-Feat AU 컬럼 (Detectorv2 출력 순서 고정)
@@ -66,7 +67,6 @@ def build_sequences(series, seq_length=20, stride=10):
 def build_dataset_from_dir(data_dir="data", seq_length=20, stride=10,
                            skip_frames=10, device="cpu"):
     """data/ 안 모든 영상 → AU 추출 → 윈도우 시퀀스 합치기 (N, seq_length, 20)"""
-    import glob
     paths = sorted(glob.glob(f"{data_dir}/**/*.mp4", recursive=True))
     print(f"[extractor] 영상 {len(paths)}개 발견")
 

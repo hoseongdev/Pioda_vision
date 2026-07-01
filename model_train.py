@@ -6,10 +6,10 @@ model_train.py — 영상 안면 지표 기반 LSTM 오토인코더 학습
     음성 모듈과 동일한 비지도 이상 탐지 방식 — 학습된 정상 패턴을 잘 복원하지
     못하는(재구성 오차가 큰) 입력을 '이상(안면 동결 등 인지 저하 의심)'으로 판단.
 
-[입력 피처 6개]  (feature_extractor.extract_distance_series)
-    mouth_width / mouth_open / brow_eye_L / brow_eye_R / ear / asymmetry
-    → 모두 두 눈 사이 거리로 정규화된 안면 거리 지표.
-      치매의 안면 동결(hypomimia)은 이 값들의 '시간당 변동 폭'이 줄어드는 특징.
+[입력 피처 20개]  (feature_extractor.extract_au_series)
+    Py-Feat이 추출한 Action Unit(AU) 20종 활성도 (AU01~AU43).
+    AU는 FACS 기반 표정 근육 단위. 치매의 안면 동결(hypomimia)은
+    이 AU들의 '시간당 변동 폭'이 줄어드는 특징.
 
 [정규화]  Z-score. 학습 데이터 전체의 피처별 mean/std로 (x-mean)/std.
           추론 시 동일 통계 필요 → norm_stats.pt 저장.
@@ -35,9 +35,9 @@ from feature_extractor import build_dataset_from_dir, NUM_FEATURES
 class VisionLSTMAutoencoder(nn.Module):
     """
     LSTM 오토인코더.
-      encoder      : 시퀀스(seq_len, 6) → 마지막 hidden state로 압축
+      encoder      : 시퀀스(seq_len, 20) → 마지막 hidden state로 압축
       decoder_lstm : 압축 벡터를 seq_len 길이로 펼쳐 복원
-      output_layer : hidden_dim → 원래 피처 차원(6)
+      output_layer : hidden_dim → 원래 피처 차원(20)
     입력을 그대로 복원하도록 학습, 복원 오차(MSE)를 이상 점수로 사용.
     """
     def __init__(self, input_dim=NUM_FEATURES, hidden_dim=32, num_layers=2):
